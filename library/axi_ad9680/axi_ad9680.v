@@ -40,8 +40,7 @@
 module axi_ad9680 #(
 
   parameter ID = 0,
-  parameter DEVICE_TYPE = 0,
-  parameter IO_DELAY_GROUP = "adc_if_delay_group") (
+  parameter DEVICE_TYPE = 0) (
 
   // jesd interface 
   // rx_clk is (line-rate/40)
