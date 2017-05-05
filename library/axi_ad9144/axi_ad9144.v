@@ -74,7 +74,7 @@ module axi_ad9144 #(
   input                   s_axi_aclk,
   input                   s_axi_aresetn,
   input                   s_axi_awvalid,
-  input       [ 31:0]     s_axi_awaddr,
+  input       [ 15:0]     s_axi_awaddr,
   input       [ 2:0]      s_axi_awprot,
   output                  s_axi_awready,
   input                   s_axi_wvalid,
@@ -85,7 +85,7 @@ module axi_ad9144 #(
   output      [ 1:0]      s_axi_bresp,
   input                   s_axi_bready,
   input                   s_axi_arvalid,
-  input       [ 31:0]     s_axi_araddr,
+  input       [ 15:0]     s_axi_araddr,
   input       [ 2:0]      s_axi_arprot,
   output                  s_axi_arready,
   output                  s_axi_rvalid,
@@ -93,152 +93,52 @@ module axi_ad9144 #(
   output      [ 1:0]      s_axi_rresp,
   input                   s_axi_rready);
 
-
-  // internal clocks and resets
-
-  wire                                    dac_rst;
-  wire                                    up_clk;
-  wire                                    up_rstn;
-
   // internal signals
 
   wire    [255:0]                         tx_data_s;
-  wire    [ 15:0]                         dac_data_0_0_s;
-  wire    [ 15:0]                         dac_data_0_1_s;
-  wire    [ 15:0]                         dac_data_0_2_s;
-  wire    [ 15:0]                         dac_data_0_3_s;
-  wire    [ 15:0]                         dac_data_1_0_s;
-  wire    [ 15:0]                         dac_data_1_1_s;
-  wire    [ 15:0]                         dac_data_1_2_s;
-  wire    [ 15:0]                         dac_data_1_3_s;
-  wire    [ 15:0]                         dac_data_2_0_s;
-  wire    [ 15:0]                         dac_data_2_1_s;
-  wire    [ 15:0]                         dac_data_2_2_s;
-  wire    [ 15:0]                         dac_data_2_3_s;
-  wire    [ 15:0]                         dac_data_3_0_s;
-  wire    [ 15:0]                         dac_data_3_1_s;
-  wire    [ 15:0]                         dac_data_3_2_s;
-  wire    [ 15:0]                         dac_data_3_3_s;
-  wire                                    up_wreq_s;
-  wire    [ 13:0]                         up_waddr_s;
-  wire    [ 31:0]                         up_wdata_s;
-  wire                                    up_wack_s;
-  wire                                    up_rreq_s;
-  wire    [ 13:0]                         up_raddr_s;
-  wire    [ 31:0]                         up_rdata_s;
-  wire                                    up_rack_s;
-
-  // signal name changes
-
-  assign up_clk = s_axi_aclk;
-  assign up_rstn = s_axi_aresetn;
 
   // dual/quad cores
 
-  assign tx_valid = 1'b1;
   assign tx_data = (QUAD_OR_DUAL_N == 1) ? tx_data_s : tx_data_s[127:0];
 
-  // device interface
+  assign dac_clk = tx_clk;
 
-  axi_ad9144_if #(.DEVICE_TYPE (DEVICE_TYPE)) i_if (
-    .tx_clk (tx_clk),
-    .tx_data (tx_data_s),
-    .dac_clk (dac_clk),
-    .dac_rst (dac_rst),
-    .dac_data_0_0 (dac_data_0_0_s),
-    .dac_data_0_1 (dac_data_0_1_s),
-    .dac_data_0_2 (dac_data_0_2_s),
-    .dac_data_0_3 (dac_data_0_3_s),
-    .dac_data_1_0 (dac_data_1_0_s),
-    .dac_data_1_1 (dac_data_1_1_s),
-    .dac_data_1_2 (dac_data_1_2_s),
-    .dac_data_1_3 (dac_data_1_3_s),
-    .dac_data_2_0 (dac_data_2_0_s),
-    .dac_data_2_1 (dac_data_2_1_s),
-    .dac_data_2_2 (dac_data_2_2_s),
-    .dac_data_2_3 (dac_data_2_3_s),
-    .dac_data_3_0 (dac_data_3_0_s),
-    .dac_data_3_1 (dac_data_3_1_s),
-    .dac_data_3_2 (dac_data_3_2_s),
-    .dac_data_3_3 (dac_data_3_3_s));
+  axi_dac_jesd204 #(
+    .ID(ID),
+    .DEVICE_TYPE(DEVICE_TYPE),
+    .NUM_LANES(8),
+    .NUM_CHANNELS(4),
+    .DAC_DATAPATH_DISABLE(DAC_DATAPATH_DISABLE)
+  ) i_dac_jesd204 (
+    .tx_clk(tx_clk),
+    .tx_valid(tx_valid),
+    .tx_data(tx_data_s),
+    .tx_ready(tx_ready),
 
-  // core
+    .dac_valid({dac_valid_3,dac_valid_2,dac_valid_1,dac_valid_0}),
+    .dac_enable({dac_enable_3,dac_enable_2,dac_enable_1,dac_enable_0}),
+    .dac_ddata({dac_ddata_3,dac_ddata_2,dac_ddata_1,dac_ddata_0}),
+    .dac_dunf(dac_dunf),
 
-  axi_ad9144_core #(.ID(ID), .DATAPATH_DISABLE(DAC_DATAPATH_DISABLE)) i_core (
-    .dac_clk (dac_clk),
-    .dac_rst (dac_rst),
-    .dac_data_0_0 (dac_data_0_0_s),
-    .dac_data_0_1 (dac_data_0_1_s),
-    .dac_data_0_2 (dac_data_0_2_s),
-    .dac_data_0_3 (dac_data_0_3_s),
-    .dac_data_1_0 (dac_data_1_0_s),
-    .dac_data_1_1 (dac_data_1_1_s),
-    .dac_data_1_2 (dac_data_1_2_s),
-    .dac_data_1_3 (dac_data_1_3_s),
-    .dac_data_2_0 (dac_data_2_0_s),
-    .dac_data_2_1 (dac_data_2_1_s),
-    .dac_data_2_2 (dac_data_2_2_s),
-    .dac_data_2_3 (dac_data_2_3_s),
-    .dac_data_3_0 (dac_data_3_0_s),
-    .dac_data_3_1 (dac_data_3_1_s),
-    .dac_data_3_2 (dac_data_3_2_s),
-    .dac_data_3_3 (dac_data_3_3_s),
-    .dac_valid_0 (dac_valid_0),
-    .dac_enable_0 (dac_enable_0),
-    .dac_ddata_0 (dac_ddata_0),
-    .dac_valid_1 (dac_valid_1),
-    .dac_enable_1 (dac_enable_1),
-    .dac_ddata_1 (dac_ddata_1),
-    .dac_valid_2 (dac_valid_2),
-    .dac_enable_2 (dac_enable_2),
-    .dac_ddata_2 (dac_ddata_2),
-    .dac_valid_3 (dac_valid_3),
-    .dac_enable_3 (dac_enable_3),
-    .dac_ddata_3 (dac_ddata_3),
-    .dac_dunf (dac_dunf),
-    .up_rstn (up_rstn),
-    .up_clk (up_clk),
-    .up_wreq (up_wreq_s),
-    .up_waddr (up_waddr_s),
-    .up_wdata (up_wdata_s),
-    .up_wack (up_wack_s),
-    .up_rreq (up_rreq_s),
-    .up_raddr (up_raddr_s),
-    .up_rdata (up_rdata_s),
-    .up_rack (up_rack_s));
-
-  // up bus interface
-
-  up_axi i_up_axi (
-    .up_rstn (up_rstn),
-    .up_clk (up_clk),
-    .up_axi_awvalid (s_axi_awvalid),
-    .up_axi_awaddr (s_axi_awaddr),
-    .up_axi_awready (s_axi_awready),
-    .up_axi_wvalid (s_axi_wvalid),
-    .up_axi_wdata (s_axi_wdata),
-    .up_axi_wstrb (s_axi_wstrb),
-    .up_axi_wready (s_axi_wready),
-    .up_axi_bvalid (s_axi_bvalid),
-    .up_axi_bresp (s_axi_bresp),
-    .up_axi_bready (s_axi_bready),
-    .up_axi_arvalid (s_axi_arvalid),
-    .up_axi_araddr (s_axi_araddr),
-    .up_axi_arready (s_axi_arready),
-    .up_axi_rvalid (s_axi_rvalid),
-    .up_axi_rresp (s_axi_rresp),
-    .up_axi_rdata (s_axi_rdata),
-    .up_axi_rready (s_axi_rready),
-    .up_wreq (up_wreq_s),
-    .up_waddr (up_waddr_s),
-    .up_wdata (up_wdata_s),
-    .up_wack (up_wack_s),
-    .up_rreq (up_rreq_s),
-    .up_raddr (up_raddr_s),
-    .up_rdata (up_rdata_s),
-    .up_rack (up_rack_s));
+    .s_axi_aclk(s_axi_aclk),
+    .s_axi_aresetn(s_axi_aresetn),
+    .s_axi_awvalid(s_axi_awvalid),
+    .s_axi_awaddr(s_axi_awaddr),
+    .s_axi_awready(s_axi_awready),
+    .s_axi_wvalid(s_axi_wvalid),
+    .s_axi_wdata(s_axi_wdata),
+    .s_axi_wstrb(s_axi_wstrb),
+    .s_axi_wready(s_axi_wready),
+    .s_axi_bvalid(s_axi_bvalid),
+    .s_axi_bresp(s_axi_bresp),
+    .s_axi_bready(s_axi_bready),
+    .s_axi_arvalid(s_axi_arvalid),
+    .s_axi_araddr(s_axi_araddr),
+    .s_axi_arready(s_axi_arready),
+    .s_axi_rvalid(s_axi_rvalid),
+    .s_axi_rdata(s_axi_rdata),
+    .s_axi_rresp(s_axi_rresp),
+    .s_axi_rready(s_axi_rready)
+  );
 
 endmodule
-
-// ***************************************************************************
-// ***************************************************************************
