@@ -88,6 +88,7 @@ clean:
 	make -C spi_engine/spi_engine_interconnect clean
 	make -C axi_ad9684 clean
 	make -C axi_adc_decimate clean
+	make -C axi_adc_jesd204 clean
 
 	make -C interfaces clean
 
@@ -174,6 +175,7 @@ lib:
 	make -C spi_engine/spi_engine_interconnect
 	make -C axi_ad9684
 	make -C axi_adc_decimate
+	make -C axi_adc_jesd204
 
 	make -C interfaces
 
