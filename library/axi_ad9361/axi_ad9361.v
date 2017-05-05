@@ -130,7 +130,6 @@ module axi_ad9361 #(
   output          adc_valid_q1,
   output  [15:0]  adc_data_q1,
   input           adc_dovf,
-  input           adc_dunf,
   output          adc_r1_mode,
 
   output          dac_enable_i0,
@@ -562,7 +561,6 @@ module axi_ad9361 #(
     .adc_valid_q1 (adc_valid_q1_s),
     .adc_data_q1 (adc_data_q1_s),
     .adc_dovf (adc_dovf),
-    .adc_dunf (adc_dunf),
     .up_adc_gpio_in (up_adc_gpio_in),
     .up_adc_gpio_out (up_adc_gpio_out),
     .up_rstn (up_rstn),

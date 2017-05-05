@@ -65,7 +65,6 @@ module axi_ad9467#(
   output                  adc_enable,
   output      [15:0]      adc_data,
   input                   adc_dovf,
-  input                   adc_dunf,
 
   // axi interface
 
@@ -225,7 +224,6 @@ module axi_ad9467#(
     .adc_status (1'b1),
     .adc_sync_status (1'd0),
     .adc_status_ovf (adc_dovf),
-    .adc_status_unf (adc_dunf),
     .adc_clk_ratio (32'b1),
     .adc_start_code (),
     .adc_sync (),
