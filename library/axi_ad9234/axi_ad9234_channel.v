@@ -42,7 +42,6 @@
 
 module axi_ad9234_channel #(
 
-  parameter Q_OR_I_N = 0,
   parameter CHANNEL_ID = 0) (
 
   // adc interface

@@ -165,7 +165,7 @@ module axi_ad9234 #(
 
   // channel
 
-  axi_ad9234_channel #(.Q_OR_I_N(0), .CHANNEL_ID(0)) i_channel_0 (
+  axi_ad9234_channel #(.CHANNEL_ID(0)) i_channel_0 (
     .adc_clk (adc_clk),
     .adc_rst (adc_rst),
     .adc_data (adc_data_a_s),
@@ -188,7 +188,7 @@ module axi_ad9234 #(
 
   // channel
 
-  axi_ad9234_channel #(.Q_OR_I_N(1), .CHANNEL_ID(1)) i_channel_1 (
+  axi_ad9234_channel #(.CHANNEL_ID(1)) i_channel_1 (
     .adc_clk (adc_clk),
     .adc_rst (adc_rst),
     .adc_data (adc_data_b_s),
