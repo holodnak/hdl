@@ -24,7 +24,6 @@ clean:
 	make -C cn0363/cn0363_dma_sequencer clean
 	make -C axi_ad9625 clean
 	make -C axi_mc_controller clean
-	make -C axi_ad9234 clean
 	make -C util_cpack clean
 	make -C axi_hdmi_tx clean
 	make -C axi_ad9152 clean
@@ -112,7 +111,6 @@ lib:
 	make -C cn0363/cn0363_dma_sequencer
 	make -C axi_ad9625
 	make -C axi_mc_controller
-	make -C axi_ad9234
 	make -C util_cpack
 	make -C axi_hdmi_tx
 	make -C axi_ad9152
